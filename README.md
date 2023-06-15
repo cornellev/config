@@ -16,7 +16,7 @@ OUTPUT:c++
 
 ### Unix-like systems (macOS, Linux, etc.)
 
-```
+```bash
 git clone https://github.com/ethanuppal/config
     && cd config
     && make install
@@ -28,7 +28,7 @@ This command will install the static (`config.a`) and dynamic (`config.so`) libr
 
 If you have `clang` installed, you can run
 
-```
+```bash
 git clone https://github.com/ethanuppal/config
     && cd config
     && make all
@@ -129,7 +129,7 @@ Tells config what the variable delimiters look like.
 Param | Description
 ----- | -----------
 `delimiters` | A list of variable delimiters.
-`escape` An optional escape character. Set this to 0 if you don't want any escaping. If specified, variable names can include a delimiter character provided it is prefixed with the escape character. It will show up in the callback without the escape. A sequence of two escape characters will show up as a single one.
+`escape` | An optional escape character. Set this to 0 if you don't want any escaping. If specified, variable names can include a delimiter character provided it is prefixed with the escape character. It will show up in the callback without the escape. A sequence of two escape characters will show up as a single one.
 
 If this function is not invoked, config will behave as if it was run as
 ```c
