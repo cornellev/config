@@ -1,6 +1,6 @@
 # config
 
-Config is simple library for parsing configuration files.
+Config is a simple library for parsing configuration files.
 
 ```
 # This is a configuration file
