@@ -1,0 +1,7 @@
+# welcome to my config file
+
+THIS = IS
+A =TEST # look a pair!
+   # empty line!
+lol=   LOL
+   ES\=CA\=\\PE=Now doesn't matter == = == ==

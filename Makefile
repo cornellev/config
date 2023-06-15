@@ -1,20 +1,24 @@
 # Copyright (C) 2023 Ethan Uppal. All rights reserved.
 
-SRCDIR		:= ./src
-INCLUDEDIR	:= ./src
+SRCDIR		:= .
+INCLUDEDIR	:= .
 
 CC			:= $(shell which gcc || which clang)
 CFLAGS		:= -std=c99 -pedantic -Wall -Wextra -I $(INCLUDEDIR)
 CDEBUG		:= -g
 CRELEASE	:= -O2
-TARGETDIR	:= lib
-TARGET		:= $(TARGETDIR)/$config
+TARGET		:= config
 
 # CFLAGS 		+= $(CRELEASE)
-CFLAGS 		+= $(CDEBUG)
+# CFLAGS 		+= $(CDEBUG)
 
-SRC			:= $(shell find $(SRCDIR) -name "*.c" -type f)
+SRC			:= config.c
 OBJ			:= $(SRC:.c=.o)
+
+PUBHEA		:= config.h
+
+INSTLIB		:= /usr/local/lib
+INSTHEA		:= /usr/local/include/$(TARGET)
 
 # NOT MY CODE
 # Customizes ar for macOS
@@ -28,16 +32,14 @@ endif
 
 all: static dynamic
 static: $(TARGET).a
-dynamic: $(TARGET).o
-
-$(TARGET):
+dynamic: $(TARGET).so
 
 %.o: %.c
 	@echo 'Compiling $@'
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $^ -c -o $@
 
 clean:
-	rm -rf $(TARGET).a $(TARGET).so $(OBJ)
+	rm -rf $(TARGET).a $(TARGET).so $(OBJ) test/main docs
 
 $(TARGET).a: $(OBJ)
 	@echo 'Creating static $@'
@@ -47,12 +49,27 @@ $(TARGET).so: $(OBJ)
 	@echo 'Creating dynamic $@'
 	$(CC) $(CFLAGS) -shared $< -o $@
 
-PY := python3
+install: $(TARGET).a $(TARGET).so
+	mv $(TARGET).a $(INSTLIB)
+	mv $(TARGET).so $(INSTLIB)
+	mkdir -p $(INSTHEA)
+	cp $(PUBHEA) $(INSTHEA)
 
-serve:
+
+# ------------------------------ Docs + Testing ------------------------------ #
+
+PY 			:= python3
+TESTSRC     := ./test/main.c
+
+docs:
+	doxygen
+
+serve: docs
 	$(PY) -m http.server 8080
 
-test: main.c static
+build_test: $(TESTSRC) $(TARGET).a
+	$(CC) $(CFLAGS) $^ -o ./test/main
+
+test: static build_test
 	@echo 'Running test program main.c'
-	$(CC) $(CFLAGS) $< -o main
-	./main
+	cd ./test; ./main config.txt

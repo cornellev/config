@@ -6,13 +6,17 @@
 #include <stdbool.h>
 #include "config.h"
 
+#define ESC '\033'
+
 static struct {
     const char* comments;
     const char* delimiters;
+    const char* whitespace;
     char escape;
 } conf = {
-    .comments = " #",
+    .comments = "\n#",
     .delimiters = "=",
+    .whitespace = " \t",
     .escape = '\\'
 };
 
@@ -28,6 +32,10 @@ void conf_set_comments(const char* comments) {
 void conf_set_delimiters(const char* delimiters, char escape) {
     conf.delimiters = delimiters;
     conf.escape = escape;
+}
+
+void conf_set_trimming(const char* whitespace) {
+    conf.whitespace = whitespace;
 }
 
 int conf_parse_file(FILE* f, conf_parse_handler_t handler, void* user_data) {
@@ -84,9 +92,62 @@ bool conf_should_end_var(char c) {
     return strchr(conf.delimiters, c) != NULL;
 }
 
+/**
+ * @private
+ * @pre `conf.whitespace` is not `NULL`.
+ */
+char* conf_trim(char* str) {
+    // Strip leading whitespace
+    while (strchr(conf.whitespace, *str) != NULL) {
+        str++;
+    }
+
+    // Strip trailing whitespace
+    size_t length = strlen(str);
+    if (length > 0) {
+        while (strchr(conf.whitespace, str[length - 1]) != NULL) {
+            length--;
+        }
+        str[length] = 0;
+    }
+
+    return str;
+}
+
+/**
+ * @private
+ */
+void conf_clean(char* str) {
+    ssize_t i;
+    ssize_t offset = 0;
+    for (i = 0; str[i]; i++) {
+        str[i - offset] = str[i];
+        if (str[i] == ESC) {
+            offset++;
+        }
+    }
+    str[i - offset] = 0;
+}
+
+/**
+ * @private
+ */
 void conf_process_var(char* s, size_t var_start, size_t var_end, size_t data_start, size_t data_end, conf_parse_handler_t handler, void* user_data) {
-    printf("var: \"%.*s\"\n", (int)(var_end - var_start), s + var_start);
-    printf("data: \"%.*s\"\n", (int)(data_end - data_start), s + data_start);
+    char* var = s + var_start;
+    var[var_end - var_start] = 0;
+
+    char* data = s + data_start;
+    data[data_end - data_start] = 0;
+
+    conf_clean(var);
+    conf_clean(data);
+
+    if (conf.whitespace) {
+        var = conf_trim(var);
+        data = conf_trim(data);
+    }
+
+    handler(var, data, user_data);
 }
 
 void conf_parse_internal(char* s, size_t length, conf_parse_handler_t handler, void* user_data) {
@@ -120,8 +181,9 @@ void conf_parse_internal(char* s, size_t length, conf_parse_handler_t handler, v
             case CONF_EXPECT_VAR: {
                 if (c == conf.escape) {
                     state = CONF_VAR_ESCAPED;
+                    s[i] = ESC;
                 } else if (conf_should_end_var(c)) {
-                    var_end = i + 1;
+                    var_end = i;
                     state = CONF_EXPECT_DELIM;
                 }
                 break;
@@ -133,9 +195,10 @@ void conf_parse_internal(char* s, size_t length, conf_parse_handler_t handler, v
             }
             case CONF_EXPECT_DELIM: {
                 // we already know we're at a delim because that's what
-                // conf_should_end_varname checks, so we just move on to
+                // conf_should_end_var checks, so we just move on to
                 // CONF_EXPECT_DATA
                 state = CONF_EXPECT_DATA;
+                data_start = i;
                 break;
             }
             case CONF_EXPECT_DATA: {

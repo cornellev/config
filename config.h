@@ -3,6 +3,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdbool.h>
 
 /**
  * A callback for when config finds a new variable. Implement your code in this callback. The parameters besides `user_data` are read-only and valid for only as long as config is parsing, so be sure to copy them if you want to use it outside of the callback.
@@ -11,7 +12,7 @@
  * @param data The variable's value.
  *
  * @code
- * void callback(const char* var, const char *data, void *user_data) {
+ * void callback(const char *var, const char *data, void *user_data) {
  *     myapi_t *api = (myapi_t*)user_data;
  *     if (strcmp(var, "PATH") == 0) {
  *         api->path = data;
@@ -26,7 +27,7 @@ typedef void (*conf_parse_handler_t)(const char* var, const char* data, void* us
  *
  * If this function is not invoked, config will behave as if it was run as
  * @code
- * conf_set_comments(" #");
+ * conf_set_comments("\n#");
  * @endcode
  *
  * @param comments A list of characters. Any line starting with these characters will be ignores. Empty lines are automatically ignored.
@@ -62,6 +63,25 @@ void conf_set_comments(const char* comments);
  * @endcode
  */
 void conf_set_delimiters(const char* delimiters, char escape);
+
+/**
+ * @todo Must be implemented.
+ *
+ * Tells config whether to trim leading and trailing whitespace from entries.
+ *
+ * If this function is not invoked, config will behave as if it was run as
+ * @code
+ * conf_set_trimming(" \t");
+ * @endcode
+ *
+ * @param whitespace A list of characters to trim. If this value is `NULL`, trimming is disabled.
+ *
+ * @code
+ * // Disable trimming
+ * conf_set_trimming(NULL);
+ * @endcode
+ */
+void conf_set_trimming(const char* whitespace);
 
 /**
  * Parses the given file as a configuration file. See @ref conf_parse_handler_t for more information on usage.
