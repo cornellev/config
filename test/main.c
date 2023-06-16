@@ -1,11 +1,14 @@
 // Copyright (C) 2023 Ethan Uppal. All rights reserved.
 // config: main.c: Example program to illustate the use of the config library.
+//
+// Warning: This test program uses GNU C extensions as follows:
+//     L16: The two ## before the __VA_ARGS__
 
 #include <stdio.h> // fprintf, FILE routines
 #include <stdlib.h> // malloc, free
 #include <string.h> // strerror
 #include <errno.h> // errno
-#include "config.h" /* Change this path if necessary. */
+#include <config/config.h> /* Change this path if necessary. */
 
 // Error macros (GNU-extended)
 #define ERROR(fmt, ...) \

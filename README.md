@@ -17,20 +17,22 @@ OUTPUT:c++
 ### Unix-like systems (macOS, Linux, etc.)
 
 ```bash
-git clone https://github.com/ethanuppal/config
-    && cd config
+git clone https://github.com/ethanuppal/config \
+    && cd config \
     && make install
 ```
 
-This command will install the static (`config.a`) and dynamic (`config.so`) libraries in `/usr/local/lib` and the header file `config.h` in `/usr/local/include`.
+This command will install the static (`libconfig.a`) and dynamic (`libconfig.so`) libraries in `/usr/local/lib` and the header file `<config/config.h>` in `/usr/local/include`.
+
+Run `make uninstall` to uninstall the library.
 
 ### Windows
 
-If you have `clang` installed, you can run
+If you have `clang` and `make` installed, you can run the following commands in `bash` or similar:
 
 ```bash
-git clone https://github.com/ethanuppal/config
-    && cd config
+git clone https://github.com/ethanuppal/config \
+    && cd config \
     && make all
 ```
 

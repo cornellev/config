@@ -1,4 +1,6 @@
 # Copyright (C) 2023 Ethan Uppal. All rights reserved.
+#
+# Purpose: builds and installs the config library.
 
 SRCDIR		:= .
 INCLUDEDIR	:= .
@@ -9,13 +11,16 @@ CDEBUG		:= -g
 CRELEASE	:= -O2
 TARGET		:= config
 
-# CFLAGS 		+= $(CRELEASE)
-# CFLAGS 		+= $(CDEBUG)
+CFLAGS 		+= $(CRELEASE)
 
 SRC			:= config.c
 OBJ			:= $(SRC:.c=.o)
 
 PUBHEA		:= config.h
+
+STATICLIB	:= lib$(TARGET).a
+DYNLIB		:= lib$(TARGET).so
+LCLLIBS		:= $(STATICLIB) $(DYNLIB)
 
 INSTLIB		:= /usr/local/lib
 INSTHEA		:= /usr/local/include/$(TARGET)
@@ -31,45 +36,56 @@ AR_OPT 	:= rcs $@ $^
 endif
 
 all: static dynamic
-static: $(TARGET).a
-dynamic: $(TARGET).so
+static: $(STATICLIB)
+dynamic: $(DYNLIB)
 
 %.o: %.c
 	@echo 'Compiling $@'
 	$(CC) $(CFLAGS) $^ -c -o $@
 
 clean:
-	rm -rf $(TARGET).a $(TARGET).so $(OBJ) test/main docs
+	rm -rf $(LCLLIBS) $(OBJ) test/main docs
 
-$(TARGET).a: $(OBJ)
+$(STATICLIB): $(OBJ)
 	@echo 'Creating static $@'
 	$(AR) $(AR_OPT) $^ -o $@
 
-$(TARGET).so: $(OBJ)
+$(DYNLIB): $(OBJ)
 	@echo 'Creating dynamic $@'
 	$(CC) $(CFLAGS) -shared $< -o $@
 
-install: $(TARGET).a $(TARGET).so
-	mv $(TARGET).a $(INSTLIB)
-	mv $(TARGET).so $(INSTLIB)
+install: $(LCLLIBS)
+	mv $(STATICLIB) $(INSTLIB)
+	mv $(DYNLIB) $(INSTLIB)
 	mkdir -p $(INSTHEA)
 	cp $(PUBHEA) $(INSTHEA)
 
+uninstall:
+	rm -rf $(INSTLIB)/$(STATICLIB) \
+		$(INSTLIB)/$(DYNLIB) \
+		$(INSTHEA)
 
-# ------------------------------ Docs + Testing ------------------------------ #
+# check:
+# 	if [ ! -f "$(INSTLIB)/$(TARGET).a" ]
+# 	then
+# 	    echo "Static library not installed." >&2
+# 	fi
+# 	if [ ! -f "$(INSTLIB)/$(TARGET).so" ]
+# 	then
+# 	    echo "Dynamic library not installed." >&2
+# 	fi
+# 	if [ ! -f "$(INSTHEA)" ]
+# 	then
+# 	    echo "Library headers not installed." >&2
+# 	fi
 
-PY 			:= python3
-TESTSRC     := ./test/main.c
-
+# Requires doxygen to be installed.
+# Link: https://www.doxygen.nl
 docs:
+	if ! command -v doxygen &> /dev/null
+	then
+	    echo "'doxygen' could not be found"
+		echo "You can install it from https://www.doxygen.nl"
+	    exit
+	fi
 	doxygen
-
-serve: docs
-	$(PY) -m http.server 8080
-
-build_test: $(TESTSRC) $(TARGET).a
-	$(CC) $(CFLAGS) $^ -o ./test/main
-
-test: static build_test
-	@echo 'Running test program main.c'
-	cd ./test; ./main config.txt
