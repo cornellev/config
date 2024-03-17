@@ -14,16 +14,13 @@ static struct {
     const char* whitespace;
     char escape;
 } conf = {
-    .comments = "\n#",
-    .delimiters = "=",
-    .whitespace = " \t",
-    .escape = '\\'
-};
+    .comments = "\n#", .delimiters = "=", .whitespace = " \t", .escape = '\\'};
 
 /**
  * @private
  */
-void conf_parse_internal(char* s, size_t length, conf_parse_handler_t handler, void* user_data);
+void conf_parse_internal(char* s, size_t length, conf_parse_handler_t handler,
+    void* user_data);
 
 void conf_set_comments(const char* comments) {
     conf.comments = comments;
@@ -63,7 +60,8 @@ int conf_parse_file(FILE* f, conf_parse_handler_t handler, void* user_data) {
     return 0;
 }
 
-int conf_parse_text(const char* s, conf_parse_handler_t handler, void* user_data) {
+int conf_parse_text(const char* s, conf_parse_handler_t handler,
+    void* user_data) {
     size_t length = strlen(s);
     char* s_copy = malloc(length + 1);
     if (!s_copy) {
@@ -132,7 +130,9 @@ void conf_clean(char* str) {
 /**
  * @private
  */
-void conf_process_var(char* s, size_t var_start, size_t var_end, size_t data_start, size_t data_end, conf_parse_handler_t handler, void* user_data) {
+void conf_process_var(char* s, size_t var_start, size_t var_end,
+    size_t data_start, size_t data_end, conf_parse_handler_t handler,
+    void* user_data) {
     char* var = s + var_start;
     var[var_end - var_start] = 0;
 
@@ -150,14 +150,15 @@ void conf_process_var(char* s, size_t var_start, size_t var_end, size_t data_sta
     handler(var, data, user_data);
 }
 
-void conf_parse_internal(char* s, size_t length, conf_parse_handler_t handler, void* user_data) {
+void conf_parse_internal(char* s, size_t length, conf_parse_handler_t handler,
+    void* user_data) {
     enum {
         CONF_SKIP_LINE,
         CONF_EXPECT_VAR,
         CONF_VAR_ESCAPED,
         CONF_EXPECT_DELIM,
         CONF_EXPECT_DATA
-    } state;
+    } state = CONF_EXPECT_VAR;
 
     size_t var_start = 0, var_end = 0;
     size_t data_start = 0, data_end = 0;
@@ -166,7 +167,8 @@ void conf_parse_internal(char* s, size_t length, conf_parse_handler_t handler, v
         const char c = s[i];
         if (conf_should_skip_line(c)) {
             if (state == CONF_EXPECT_DATA) {
-                conf_process_var(s, var_start, var_end, data_start, data_end, handler, user_data);
+                conf_process_var(s, var_start, var_end, data_start, data_end,
+                    handler, user_data);
             }
             state = CONF_SKIP_LINE;
         }
@@ -206,6 +208,5 @@ void conf_parse_internal(char* s, size_t length, conf_parse_handler_t handler, v
                 break;
             }
         }
-
     }
 }

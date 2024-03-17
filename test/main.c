@@ -4,18 +4,17 @@
 // Warning: This test program uses GNU C extensions as follows:
 //     L16: The two ## before the __VA_ARGS__
 
-#include <stdio.h> // fprintf, FILE routines
-#include <stdlib.h> // malloc, free
-#include <string.h> // strerror
-#include <errno.h> // errno
+#include <stdio.h>         // fprintf, FILE routines
+#include <stdlib.h>        // malloc, free
+#include <string.h>        // strerror
+#include <errno.h>         // errno
 #include <config/config.h> /* Change this path if necessary. */
 
 // Error macros (GNU-extended)
-#define ERROR(fmt, ...) \
-    fprintf(stderr, "error: %s::%s:%d: " fmt, \
-    __FILE__, __func__, __LINE__, ##__VA_ARGS__);
-#define PERROR(msg) \
-    ERROR("%s: %s\n", msg, strerror(errno))
+#define ERROR(fmt, ...)                                                        \
+    fprintf(stderr, "error: %s::%s:%d: " fmt, __FILE__, __func__, __LINE__,    \
+        ##__VA_ARGS__);
+#define PERROR(msg) ERROR("%s: %s\n", msg, strerror(errno))
 
 void print_help(const char* self) {
     printf("usage: %s [FILE|-h]\n", self);

@@ -7,6 +7,8 @@ CC		:= $(shell which gcc || which clang)
 CFLAGS	:= -std=c99 -pedantic -Wall -Wextra \
 		   -Wno-unused-parameter \
 		   -Wno-gnu-zero-variadic-macro-arguments
+LDFLAGS	:= -L/usr/local/lib -lconfig \
+		   -I/usr/local/include 
 SRC		:= main.c
 EXEC	:= main
 
@@ -14,7 +16,7 @@ test: build_test
 	./main config.txt
 
 build_test: $(SRC)
-	$(CC) $(CFLAGS) $^ -lconfig -o $(EXEC)
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $(EXEC)
 
 clean:
 	rm -rf $(EXEC)
