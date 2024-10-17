@@ -6,7 +6,7 @@ SRCDIR		:= .
 INCLUDEDIR	:= .
 
 CC			:= $(shell which gcc || which clang)
-CFLAGS		:= -std=c99 -pedantic -Wall -Wextra -I $(INCLUDEDIR)
+CFLAGS		:= -std=c99 -pedantic -Wall -Wextra -I $(INCLUDEDIR) -D _XOPEN_SOURCE=700
 CDEBUG		:= -g
 CRELEASE	:= -O2
 TARGET		:= config
@@ -48,7 +48,7 @@ clean:
 
 $(STATICLIB): $(OBJ)
 	@echo 'Creating static $@'
-	$(AR) $(AR_OPT) $^ -o $@
+	$(AR) $(AR_OPT) $@ $^
 
 $(DYNLIB): $(OBJ)
 	@echo 'Creating dynamic $@'
