@@ -29,10 +29,10 @@ INSTHEA		:= /usr/local/include/$(TARGET)
 # Customizes ar for macOS
 ifeq ($(shell uname), Darwin)
 AR 		:= /usr/bin/libtool
-AR_OPT 	:= -static
+AR_OPT 	:= -static -o
 else
 AR 		:= ar
-AR_OPT 	:= rcs $@ $^
+AR_OPT 	:= rcs -o
 endif
 
 all: static dynamic
