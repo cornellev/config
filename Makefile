@@ -35,14 +35,20 @@ AR 		:= ar
 AR_OPT 	:= rcs -o
 endif
 
+.PHONY: all
 all: static dynamic
+
+.PHONY: static
 static: $(STATICLIB)
+
+.PHONY: dyanmic
 dynamic: $(DYNLIB)
 
 %.o: %.c
 	@echo 'Compiling $@'
 	$(CC) $(CFLAGS) $^ -c -o $@
 
+.PHONY: clean
 clean:
 	rm -rf $(LCLLIBS) $(OBJ) test/main docs
 
@@ -54,12 +60,14 @@ $(DYNLIB): $(OBJ)
 	@echo 'Creating dynamic $@'
 	$(CC) $(CFLAGS) -shared $< -o $@
 
+.PHONY: install
 install: $(LCLLIBS)
 	mv $(STATICLIB) $(INSTLIB)
 	mv $(DYNLIB) $(INSTLIB)
 	mkdir -p $(INSTHEA)
 	cp $(PUBHEA) $(INSTHEA)
 
+.PHONY: uninstall
 uninstall:
 	rm -rf $(INSTLIB)/$(STATICLIB) \
 		$(INSTLIB)/$(DYNLIB) \
@@ -81,6 +89,7 @@ uninstall:
 
 # Requires doxygen to be installed.
 # Link: https://www.doxygen.nl
+.PHONY: docs
 docs:
 	if ! command -v doxygen &> /dev/null
 	then
